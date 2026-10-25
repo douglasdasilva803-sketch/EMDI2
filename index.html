@@ -1,0 +1,542 @@
+<!doctype html>
+<html lang="pt-BR">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<title>Tatuapé Hall Prime · Salão de festas no Tatuapé</title>
+<meta name="description" content="Salão de festas no Tatuapé com lustre de cristal, escadaria iluminada e festa sem hora para acabar. Debutantes, casamentos, corporativos e aniversários a 300 m do metrô.">
+<meta property="og:type" content="website">
+<meta property="og:title" content="Tatuapé Hall Prime">
+<meta property="og:description" content="É aqui que o seu evento vai ser inesquecível. Prévia do novo site.">
+<meta property="og:image" content="https://tatuape-hall-prime.vercel.app/assets/poster.jpg">
+<meta name="robots" content="noindex">
+<meta name="theme-color" content="#0c0a0f">
+<style>html{-webkit-text-size-adjust:100%}body{margin:0}img{max-width:100%}[hidden]{display:none!important}:root{padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px)}</style>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Allura&family=DM+Serif+Display:ital@0;1&family=Instrument+Sans:wght@400;500;600&display=swap">
+<link rel="stylesheet" href="sites-incriveis.css">
+<style>
+/* Layout: noite no salão em eixo central, como um convite. Abertura em camadas (fundo, brilho, cristais, letreiro, texto),
+   porta oval que se abre para a caminhada em vídeo, números, avaliações, visita.
+   Técnicas epic-design: parallax em 6 camadas, float loop no letreiro, iris oval (clip-path) na entrada do salão,
+   palavras que acendem com a rolagem, títulos que convergem das laterais, spotlight nos cards. */
+:root{
+  --noite:#0c0a0f;
+  --veludo:#151118;
+  --linha:#2a2330;
+  --fio:rgba(228,203,162,.5);
+  --marfim:#f5efe7;
+  --nevoa:#c9c0cb;
+  --champanhe:#e4cba2;
+  --f-logo:"Allura","Brush Script MT",cursive;
+  --f-display:"DM Serif Display","Didot",Georgia,serif;
+  --f-texto:"Instrument Sans",system-ui,-apple-system,"Segoe UI",sans-serif;
+  --gutter-l:max(16px,env(safe-area-inset-left,0px));
+  --gutter-r:max(16px,env(safe-area-inset-right,0px));
+  color-scheme:dark;
+}
+*{box-sizing:border-box}
+body{background:var(--noite);color:var(--marfim);font:400 17px/1.65 var(--f-texto);-webkit-font-smoothing:antialiased;overflow-x:clip}
+a{color:inherit}
+:focus-visible{outline:2px solid var(--champanhe);outline-offset:3px}
+.pular{position:absolute;left:var(--gutter-l);top:-60px;z-index:50;background:var(--champanhe);color:var(--noite);padding:10px 16px;border-radius:999px;font-weight:600;text-decoration:none}
+.pular:focus{top:calc(10px + env(safe-area-inset-top,0px))}
+.envolve{padding-left:var(--gutter-l);padding-right:var(--gutter-r)}
+.miolo{max-width:1120px;margin-inline:auto}
+.centro{display:flex;flex-direction:column;align-items:center;text-align:center}
+.rotulo{font:600 12px/1.3 var(--f-texto);letter-spacing:.24em;text-transform:uppercase;color:var(--champanhe);margin:0}
+.ornamento{display:flex;align-items:center;gap:14px;color:var(--champanhe);font-size:10px;margin:0}
+.ornamento::before,.ornamento::after{content:"";width:56px;height:1px;background:var(--fio)}
+.titulo{font:400 clamp(36px,5.6vw,68px)/1.06 var(--f-display);letter-spacing:-.01em;margin:0;text-wrap:balance}
+.titulo em{font-style:italic;color:var(--champanhe)}
+.prova{display:inline-flex;align-items:center;gap:10px;font-size:14px;color:var(--nevoa);margin:0}
+.prova b{color:var(--champanhe);font-weight:500;letter-spacing:.1em}
+.prova strong{color:var(--marfim);font-weight:600}
+
+/* topo: faixa de avaliações + menu */
+.topo{position:sticky;top:env(safe-area-inset-top,0px);z-index:20;background:rgba(12,10,15,.86);backdrop-filter:blur(14px);-webkit-backdrop-filter:blur(14px);border-bottom:1px solid var(--linha)}
+body::before{content:"";position:fixed;inset:0 0 auto;height:env(safe-area-inset-top,0px);z-index:30;background:var(--noite)}
+.faixa{height:34px;display:flex;align-items:center;background:linear-gradient(90deg,#120e15,#1b151f 50%,#120e15);border-bottom:1px solid rgba(228,203,162,.22);padding-right:var(--gutter-r)}
+.faixa-janela{flex:1;min-width:0;overflow:hidden}
+.faixa-trilho{display:flex;width:max-content;animation:faixa 60s linear infinite}
+.faixa.pausada .faixa-trilho,.faixa:hover .faixa-trilho{animation-play-state:paused}
+.grupo{display:flex;align-items:center;gap:18px;padding-right:18px;white-space:nowrap;font-size:13px}
+.grupo b{color:var(--champanhe);font-weight:400;letter-spacing:.12em;font-size:11px}
+.grupo strong{font-weight:600;letter-spacing:.06em}
+.grupo i{font-style:normal;color:var(--nevoa);font-size:12px}
+.grupo i.sep{color:var(--champanhe);font-size:8px}
+.grupo em{font:italic 400 15px/1 var(--f-display)}
+.faixa-pausa{flex:none;width:28px;height:28px;margin-left:6px;border-radius:50%;border:1px solid rgba(228,203,162,.35);background:transparent;color:var(--champanhe);cursor:pointer;display:grid;place-items:center;font-size:10px}
+@keyframes faixa{to{transform:translateX(-50%)}}
+.topo-in{display:grid;grid-template-columns:1fr auto 1fr;align-items:center;height:60px}
+.topo-in nav{display:flex;gap:24px}
+.topo-in nav a{font:600 12px/1 var(--f-texto);letter-spacing:.2em;text-transform:uppercase;color:var(--nevoa);text-decoration:none}
+.topo-in nav a:hover{color:var(--marfim)}
+.marca-mini{font:400 30px/1 var(--f-logo);white-space:nowrap;text-decoration:none;color:var(--marfim)}
+.marca-mini small{font-size:.62em;margin-left:4px;color:var(--champanhe)}
+.topo-in .btn{justify-self:end}
+.btn{display:inline-flex;align-items:center;justify-content:center;gap:10px;border-radius:999px;font:600 13px/1 var(--f-texto);letter-spacing:.14em;text-transform:uppercase;text-decoration:none;padding:17px 28px;border:1px solid var(--champanhe);transition:background .4s,color .4s,border-color .4s,transform .4s,box-shadow .4s;cursor:pointer}
+.btn-cheio{background:var(--champanhe);color:var(--noite);box-shadow:0 10px 40px -12px rgba(228,203,162,.55)}
+.btn-cheio:hover{background:var(--marfim);border-color:var(--marfim);transform:translateY(-2px)}
+.btn-linha{color:var(--marfim);border-color:var(--fio);background:transparent}
+.btn-linha:hover{border-color:var(--champanhe)}
+.topo .btn{padding:11px 16px;font-size:12px;white-space:nowrap;box-shadow:none}
+
+/* abertura em camadas */
+.abertura{position:relative;overflow:hidden;padding-block:96px 120px;isolation:isolate}
+.layer{position:absolute;inset:0;pointer-events:none}
+.depth-0{background:url(assets/poster.jpg) center 30%/cover no-repeat;opacity:.24;filter:blur(3px) saturate(.75);transform:scale(1.08)}
+.depth-0::after{content:"";position:absolute;inset:0;background:radial-gradient(ellipse at 50% 36%,transparent 0%,var(--noite) 70%)}
+.depth-1{background:radial-gradient(circle at 50% 26%,rgba(228,203,162,.22),transparent 38%);animation:respira 9s ease-in-out infinite}
+@keyframes respira{50%{opacity:.55;transform:scale(1.06)}}
+.cristal{position:absolute;width:4px;height:4px;border-radius:50%;background:var(--champanhe);box-shadow:0 0 10px 2px rgba(228,203,162,.6);opacity:0;animation:cintila var(--t,6s) ease-in-out var(--a,0s) infinite}
+@keyframes cintila{0%,100%{opacity:0;transform:translateY(0) scale(.6)}50%{opacity:.9;transform:translateY(-14px) scale(1)}}
+.abertura .miolo{position:relative;gap:28px}
+.letreiro-wrap{animation:flutua 11s ease-in-out infinite}
+@keyframes flutua{50%{transform:translateY(-10px)}}
+.letreiro{width:min(440px,84vw);aspect-ratio:2.15/1;max-width:100%;border-radius:50%;background:#09070b;border:1px solid #3b3241;box-shadow:0 0 0 7px #110d14,0 0 0 8px var(--fio),0 40px 100px -24px rgba(228,203,162,.3);display:flex;flex-direction:column;align-items:center;justify-content:center;line-height:.9;color:#fcf9f3}
+.letreiro .nome{font:400 clamp(44px,11vw,70px)/1 var(--f-logo);text-shadow:0 0 18px rgba(255,255,255,.35)}
+.letreiro .prime{font:400 clamp(26px,6vw,38px)/1 var(--f-logo);align-self:flex-end;margin-right:24%;text-shadow:0 0 14px rgba(255,255,255,.3)}
+.abertura h1{font:400 clamp(42px,7.4vw,90px)/1.02 var(--f-display);letter-spacing:-.015em;margin:0;max-width:13ch;text-wrap:balance}
+.abertura h1 .fx-palavra.ultima{font-style:italic;color:var(--champanhe)}
+.abertura .sub{max-width:48ch;color:var(--nevoa);margin:0;font-size:18px}
+.nome-form{display:flex;flex-direction:column;align-items:center;gap:14px;width:100%;max-width:540px}
+.nome-campo{display:flex;width:100%;border:1px solid var(--fio);border-radius:999px;padding:6px;background:rgba(12,10,15,.65)}
+.nome-campo input{flex:1;min-width:0;background:transparent;border:0;color:var(--marfim);font:500 18px/1 var(--f-texto);padding:0 18px;outline:none}
+.nome-campo input::placeholder{color:var(--nevoa);font:500 16px/1 var(--f-texto)}
+.nome-campo:focus-within{border-color:var(--champanhe);box-shadow:0 0 0 4px rgba(228,203,162,.12)}
+.nome-campo .btn{padding:15px 22px;white-space:nowrap}
+.link-discreto{font-size:15px;color:var(--nevoa);text-underline-offset:4px}
+
+/* caminhada */
+.caminhada .fx-palco{display:block}
+.palco-fundo{position:absolute;inset:0;background:url(assets/poster.jpg) center/cover;filter:blur(40px) saturate(1.2);opacity:.18;transform:scale(1.2)}
+.palco-brilho{position:absolute;inset:0;background:radial-gradient(ellipse at 50% 55%,rgba(228,203,162,.12),transparent 55%)}
+.tela{position:absolute;inset:0;overflow:hidden;will-change:clip-path}
+.tela video{width:100%;height:100%;object-fit:cover;display:block}
+.sombra{position:absolute;inset:auto 0 0;height:64%;background:linear-gradient(to top,rgba(12,10,15,.95) 22%,rgba(12,10,15,.55) 60%,transparent);pointer-events:none}
+.sombra-topo{position:absolute;inset:0 0 auto;height:24%;background:linear-gradient(to bottom,rgba(12,10,15,.65),transparent);pointer-events:none}
+.legendas{position:absolute;left:var(--gutter-l);right:var(--gutter-r);bottom:calc(36px + env(safe-area-inset-bottom,0px))}
+.parada{position:absolute;left:0;right:0;bottom:0;display:flex;flex-direction:column;align-items:center;text-align:center;opacity:0;transform:translateY(16px);filter:blur(6px);transition:opacity .7s ease,transform .8s cubic-bezier(.22,1,.36,1),filter .7s ease;pointer-events:none}
+.parada.ativa{opacity:1;transform:none;filter:none;pointer-events:auto}
+.parada h2{font:400 clamp(32px,6.6vw,58px)/1.05 var(--f-display);margin:14px 0 12px;text-wrap:balance;max-width:15ch}
+.parada h2 em{font-style:italic;color:var(--champanhe)}
+.parada p.txt{margin:0;color:#f1eaf0;max-width:40ch;font-size:17px;font-weight:500;text-shadow:0 1px 12px rgba(0,0,0,.6)}
+.parada ul{list-style:none;padding:0;margin:16px 0 0;display:flex;flex-wrap:wrap;justify-content:center;gap:6px 18px;font-size:13px;font-weight:600;letter-spacing:.1em;text-transform:uppercase;color:var(--champanhe)}
+.parada li+li::before{content:"✦";font-size:7px;margin-right:18px;color:var(--fio)}
+.parada.pico h2{font:italic 400 clamp(46px,10vw,92px)/1.02 var(--f-display);color:var(--champanhe);max-width:none}
+.parada .btn{margin-top:20px}
+.trilha{position:absolute;top:calc(118px + env(safe-area-inset-top,0px));left:0;right:0;display:flex;justify-content:center}
+.passos{display:flex;gap:6px}
+.passos i{display:block;width:18px;height:1px;background:rgba(245,239,231,.28);transition:background .5s}
+.passos i.feito{background:var(--champanhe)}
+.palco-fundo,.palco-brilho{display:none}
+@media (min-width:900px){
+  .palco-fundo,.palco-brilho{display:block}
+  .caminhada .fx-palco{--alt:calc(100vh - 110px - 8vh)}
+  .tela{left:50%;right:auto;top:calc(110px + 4vh);bottom:auto;height:var(--alt);width:calc(var(--alt) * 720 / 996);max-width:calc(100vw - 48px);transform:translateX(-50%);border-radius:2px;box-shadow:0 0 0 1px var(--linha),0 0 0 10px var(--noite),0 0 0 11px var(--fio),0 60px 140px -30px rgba(0,0,0,.9)}
+  .legendas{left:50%;right:auto;width:calc(var(--alt) * 720 / 996 - 48px);transform:translateX(-50%);bottom:calc(4vh + 36px)}
+  .parada h2{font-size:clamp(28px,calc(var(--alt) * .07),48px)}
+  .parada.pico h2{font-size:clamp(36px,calc(var(--alt) * .1),72px)}
+  .parada p.txt{font-size:16px}
+  .trilha{top:calc(110px + 4vh + 28px)}
+  .tela video{object-fit:contain;background:#000}
+}
+@supports (height:100dvh){@media (min-width:900px){.caminhada .fx-palco{--alt:calc(100dvh - 110px - 8dvh)}}}
+
+/* números */
+.numeros{padding-block:128px 104px;position:relative}
+.numeros .miolo{gap:22px}
+.acender .w{transition:opacity .2s}
+.grade{display:grid;grid-template-columns:repeat(4,1fr);width:100%;margin-top:40px;border-block:1px solid var(--linha)}
+.num{display:flex;flex-direction:column;align-items:center;gap:8px;padding:44px 12px}
+.num+.num{border-left:1px solid var(--linha)}
+.num strong{font:400 clamp(50px,6.8vw,88px)/1 var(--f-display);font-variant-numeric:tabular-nums;white-space:nowrap}
+.num strong sup{font-size:.34em;color:var(--champanhe);vertical-align:super;margin-left:2px;font-family:var(--f-texto);font-weight:600;letter-spacing:.08em}
+.num>span{color:var(--nevoa);font-size:13px;font-weight:600;letter-spacing:.16em;text-transform:uppercase}
+.formatos{display:flex;flex-wrap:wrap;justify-content:center;align-items:center;gap:6px 22px;margin:44px 0 0;font:italic 400 clamp(22px,3vw,32px)/1.3 var(--f-display)}
+.formatos i{font-style:normal;font-size:9px;color:var(--champanhe)}
+
+/* avaliações */
+.avaliacoes{padding-block:112px;background:var(--veludo);border-block:1px solid var(--linha)}
+.avaliacoes .miolo{gap:18px}
+.nota{display:flex;align-items:baseline;gap:16px;margin-top:6px}
+.nota strong{font:400 clamp(72px,10vw,124px)/1 var(--f-display)}
+.estrelas{color:var(--champanhe);letter-spacing:.2em;font-size:18px}
+.nota-legenda{color:var(--nevoa);margin:0}
+.cartoes{display:grid;grid-template-columns:repeat(4,1fr);gap:16px;width:100%;margin-top:32px}
+.cartao{--mx:50%;--my:0%;display:flex;flex-direction:column;align-items:center;gap:14px;padding:38px 24px;border:1px solid var(--linha);background:radial-gradient(260px circle at var(--mx) var(--my),rgba(228,203,162,.12),transparent 60%),var(--noite);border-radius:2px;position:relative;transition:transform .5s cubic-bezier(.22,1,.36,1),border-color .5s}
+.cartao::before{content:"";position:absolute;inset:6px;border:1px solid rgba(228,203,162,.14);pointer-events:none}
+.cartao:hover{transform:translateY(-4px);border-color:rgba(228,203,162,.4)}
+.cartao .estrelas{font-size:12px}
+.cartao h3{font:italic 400 26px/1.2 var(--f-display);margin:0}
+.cartao p{margin:0;color:var(--nevoa);font-size:16px}
+.fonte{color:var(--nevoa);font-size:14px;margin:8px 0 0}
+
+/* visita */
+.convite{padding-block:128px;overflow:hidden}
+.convite .miolo{gap:24px}
+.convite .titulo span{display:block}
+.convite p.intro{color:var(--nevoa);max-width:50ch;margin:0}
+.acoes{display:flex;flex-wrap:wrap;justify-content:center;gap:12px}
+.ficha{display:grid;grid-template-columns:repeat(3,1fr);width:100%;margin-top:40px;border-block:1px solid var(--linha)}
+.ficha div{display:flex;flex-direction:column;align-items:center;gap:8px;padding:32px 16px}
+.ficha div+div{border-left:1px solid var(--linha)}
+.ficha strong{font:400 20px/1.35 var(--f-display);user-select:all}
+.rodape{padding-block:56px calc(48px + env(safe-area-inset-bottom,0px));border-top:1px solid var(--linha)}
+.rodape .miolo{gap:12px}
+.rodape .marca-mini{font-size:44px}
+.rodape small{color:var(--nevoa);font-size:14px;letter-spacing:.08em}
+
+@media (max-width:899px){
+  .topo-in nav{display:none}
+  .topo-in{grid-template-columns:auto 1fr auto}
+  .topo-in .marca-mini{grid-column:1}
+  .topo-in .btn{grid-column:3}
+  .grade{grid-template-columns:1fr 1fr}
+  .num:nth-child(3){border-left:0}
+  .num:nth-child(n+3){border-top:1px solid var(--linha)}
+  .cartoes{grid-template-columns:1fr 1fr}
+  .ficha{grid-template-columns:1fr}
+  .ficha div+div{border-left:0;border-top:1px solid var(--linha)}
+}
+@media (max-width:560px){.cartoes{grid-template-columns:1fr}}
+@media (max-width:480px){.nome-campo{flex-direction:column;border-radius:20px;gap:6px}.nome-campo input{padding:14px 12px;text-align:center}.nome-campo .btn{width:100%}}
+@media (max-width:420px){.topo .btn{padding:10px 12px;letter-spacing:.1em}.topo-in .marca-mini{font-size:26px}}
+
+/* movimento reduzido */
+.fx-reduzido .caminhada .fx-palco{position:relative;height:auto}
+.fx-reduzido .tela{position:relative;height:70vh;inset:auto;width:auto;transform:none;margin-inline:var(--gutter-l) var(--gutter-r);clip-path:none!important}
+.fx-reduzido .sombra,.fx-reduzido .sombra-topo,.fx-reduzido .trilha,.fx-reduzido .palco-fundo,.fx-reduzido .palco-brilho{display:none}
+.fx-reduzido .legendas{position:static;width:auto;transform:none;padding:32px var(--gutter-r) 56px var(--gutter-l);display:flex;flex-direction:column;gap:48px}
+.fx-reduzido .parada{position:static;opacity:1;transform:none;filter:none}
+@media (prefers-reduced-motion:reduce){
+  *,*::before,*::after{animation-duration:.01ms!important;animation-iteration-count:1!important;transition-duration:.01ms!important;scroll-behavior:auto!important}
+  .cristal{display:none}
+}
+</style>
+
+</head>
+<body>
+<a class="pular skip-link" href="#inicio">Pular para o conteúdo</a>
+<header class="topo">
+  <div class="faixa" id="faixa">
+    <div class="faixa-janela" aria-label="Avaliações no Google: nota 4,8 com 781 avaliações">
+      <div class="faixa-trilho" aria-hidden="true">
+        <span class="grupo"><b>★★★★★</b><strong>4,8 no Google</strong><i>781 avaliações</i><em>Ambiente bonito e bem estruturado</em><i class="sep">✦</i><em>Comida e open bar elogiados</em><i class="sep">✦</i><em>Organização impecável</em><i class="sep">✦</i><em>Equipe atenciosa e profissional</em><i class="sep">✦</i></span>
+        <span class="grupo"><b>★★★★★</b><strong>4,8 no Google</strong><i>781 avaliações</i><em>Ambiente bonito e bem estruturado</em><i class="sep">✦</i><em>Comida e open bar elogiados</em><i class="sep">✦</i><em>Organização impecável</em><i class="sep">✦</i><em>Equipe atenciosa e profissional</em><i class="sep">✦</i></span>
+      </div>
+    </div>
+    <button class="faixa-pausa" type="button" id="faixa-pausa" aria-pressed="false" aria-label="Pausar a faixa de avaliações">❚❚</button>
+  </div>
+  <div class="envolve"><div class="miolo topo-in">
+    <nav aria-label="Principal"><a href="#salao">O salão</a><a href="#avaliacoes">Avaliações</a></nav>
+    <a class="marca-mini" href="#inicio" aria-label="Tatuapé Hall Prime, início">Tatuapé Hall<small>Prime</small></a>
+    <a class="btn btn-cheio js-wpp" href="https://wa.me/5511995557010" target="_blank" rel="noopener">Consultar data</a>
+  </div></div>
+</header>
+
+<main id="inicio">
+  <section class="abertura envolve scene" data-scene="abertura">
+    <div class="layer depth-0" data-depth="0" aria-hidden="true"></div>
+    <div class="layer depth-1" data-depth="1" aria-hidden="true"></div>
+    <div class="layer depth-2" data-depth="2" aria-hidden="true" id="cristais"></div>
+    <div class="miolo centro">
+      <div class="letreiro-wrap depth-3" data-depth="3">
+        <div class="letreiro" role="img" aria-label="Logo Tatuapé Hall Prime" data-fx="crescer">
+          <span class="nome">Tatuapé Hall</span>
+          <span class="prime">Prime</span>
+        </div>
+      </div>
+      <div class="depth-4 centro" data-depth="4" style="gap:28px;display:flex">
+        <p class="rotulo" data-fx="surgir" data-fx-atraso="200">25 anos de festas no Tatuapé</p>
+        <h1 data-fx="palavras">É aqui que o seu evento vai ser inesquecível.</h1>
+        <p class="sub" data-fx="surgir" data-fx-atraso="500">Lustre de cristal, escadaria iluminada e festa sem hora para acabar. Debutantes, casamentos, corporativos e aniversários a 300 metros do metrô.</p>
+        <form class="nome-form" id="nome-form" data-fx="subir" data-fx-atraso="700" autocomplete="off">
+          <label class="rotulo" for="nome-evento">Para quem é a festa?</label>
+          <div class="nome-campo">
+            <input id="nome-evento" name="nome" type="text" maxlength="32" placeholder="Ex.: Ana &amp; Pedro">
+            <button class="btn btn-cheio" type="submit">Ver o salão</button>
+          </div>
+          <p class="prova"><b>★★★★★</b><strong>4,8</strong> no Google · 781 avaliações</p>
+        </form>
+      </div>
+    </div>
+  </section>
+
+  <section class="caminhada scene" data-scene="salao" id="salao" data-fx-fixa data-fx-altura="11" aria-label="Caminhada pelo salão">
+    <div class="fx-palco">
+      <div class="palco-fundo" data-depth="0" aria-hidden="true"></div>
+      <div class="palco-brilho" data-depth="1" aria-hidden="true"></div>
+      <div class="tela" data-depth="3" id="tela">
+        <video id="video-salao" muted playsinline preload="auto" poster="assets/poster.jpg" aria-hidden="true"></video>
+        <div class="sombra-topo" aria-hidden="true"></div>
+        <div class="sombra" aria-hidden="true"></div>
+      </div>
+      <div class="trilha" aria-hidden="true"><div class="passos"></div></div>
+      <div class="legendas" id="legendas" data-depth="4"></div>
+    </div>
+  </section>
+
+  <section class="numeros envolve">
+    <div class="miolo centro">
+      <p class="ornamento" aria-hidden="true">✦</p>
+      <p class="rotulo" data-fx="surgir">A casa</p>
+      <h2 class="titulo acender" id="acender">25 anos fazendo as noites mais bonitas do <em>Tatuapé.</em></h2>
+      <div class="grade">
+        <div class="num" data-fx="subir"><strong><span class="contador" data-fim="25">25</span><sup>anos</sup></strong><span>de experiência</span></div>
+        <div class="num" data-fx="subir" data-fx-atraso="100"><strong><span class="contador" data-fim="4.8" data-dec="1">4,8</span><sup>★</sup></strong><span>nota no Google</span></div>
+        <div class="num" data-fx="subir" data-fx-atraso="200"><strong><span class="contador" data-fim="781">781</span></strong><span>avaliações</span></div>
+        <div class="num" data-fx="subir" data-fx-atraso="300"><strong><span class="contador" data-fim="16">16</span><sup>mil</sup></strong><span>seguidores</span></div>
+      </div>
+      <p class="formatos" data-fx="surgir">Debutantes <i aria-hidden="true">✦</i> Casamentos <i aria-hidden="true">✦</i> Corporativos <i aria-hidden="true">✦</i> Aniversários <i aria-hidden="true">✦</i> Formaturas</p>
+    </div>
+  </section>
+
+  <section class="avaliacoes envolve" id="avaliacoes">
+    <div class="miolo centro">
+      <p class="ornamento" aria-hidden="true">✦</p>
+      <h2 class="rotulo" data-fx="surgir">O que dizem os convidados</h2>
+      <div class="nota" data-fx="subir"><strong>4,8</strong><span class="estrelas" aria-label="5 estrelas">★★★★★</span></div>
+      <p class="nota-legenda" data-fx="surgir">781 avaliações no Google</p>
+      <div class="cartoes">
+        <article class="cartao" data-fx="subir"><span class="estrelas" aria-hidden="true">★★★★★</span><h3>O ambiente</h3><p>Bonito, espaçoso e bem estruturado.</p></article>
+        <article class="cartao" data-fx="subir" data-fx-atraso="100"><span class="estrelas" aria-hidden="true">★★★★★</span><h3>A mesa</h3><p>Comida e bebidas excelentes, com destaque para o open bar.</p></article>
+        <article class="cartao" data-fx="subir" data-fx-atraso="200"><span class="estrelas" aria-hidden="true">★★★★★</span><h3>A organização</h3><p>Tudo no lugar, do começo ao fim da festa.</p></article>
+        <article class="cartao" data-fx="subir" data-fx-atraso="300"><span class="estrelas" aria-hidden="true">★★★★★</span><h3>A equipe</h3><p>Atenciosa, simpática e profissional.</p></article>
+      </div>
+      <p class="fonte">Resumo das avaliações públicas do Google.</p>
+    </div>
+  </section>
+
+  <section class="convite envolve" id="visita">
+    <div class="miolo centro">
+      <p class="ornamento" aria-hidden="true">✦</p>
+      <p class="rotulo" data-fx="surgir">Agende sua visita</p>
+      <h2 class="titulo"><span class="conv-a">Venha ver o salão aceso.</span> <span class="conv-b"><em>Ao vivo é outra coisa.</em></span></h2>
+      <p class="intro" data-fx="surgir">Pelo WhatsApp você consulta a sua data e marca uma visita. Conheça a escadaria, o lustre e a pista antes de decidir, e o orçamento sai do jeito do seu evento.</p>
+      <div class="acoes" data-fx="subir">
+        <a class="btn btn-cheio js-wpp" href="https://wa.me/5511995557010" target="_blank" rel="noopener">Consultar minha data</a>
+        <a class="btn btn-linha" href="https://www.instagram.com/tatuapehallprimeoficial/" target="_blank" rel="noopener">Ver o Instagram</a>
+      </div>
+      <p class="prova" data-fx="surgir"><b>★★★★★</b><strong>4,8</strong> · 781 avaliações no Google</p>
+      <div class="ficha" data-fx="surgir">
+        <div><span class="rotulo">Endereço</span><strong>R. Antônio de Barros, 644<br>Tatuapé</strong></div>
+        <div><span class="rotulo">WhatsApp</span><strong>(11) 99555-7010</strong></div>
+        <div><span class="rotulo">Como chegar</span><strong>300 m do metrô<br>Estacionamento no local</strong></div>
+      </div>
+    </div>
+  </section>
+</main>
+
+<footer class="rodape envolve">
+  <div class="miolo centro">
+    <span class="marca-mini">Tatuapé Hall<small>Prime</small></span>
+    <small>Prévia desenvolvida por Douglas Justiniano</small>
+  </div>
+</footer>
+
+<script>
+(function(){
+  document.documentElement.lang="pt-BR";
+  /* t0,t1 = trecho do vídeo (s); peso = quanto de rolagem a parada ganha */
+  var PARADAS=[
+    {t0:0,t1:2,peso:1,rotulo:"A rua",titulo:"A melhor rua do Tatuapé para <em>eventos.</em>",
+      texto:"Sede própria, discreta e fácil de chegar. A noite é só sua e dos seus convidados.",
+      lista:["Sem limite de horário","Estacionamento","Privacidade","300 m do metrô"]},
+    {t0:2,t1:3.6,peso:1,rotulo:"A escadaria",titulo:"Uma entrada <em>de cinema.</em>",
+      texto:"Degraus iluminados e todos os olhares na escada. É o momento que vira a foto da noite."},
+    {t0:3.6,t1:11,peso:2,rotulo:"O lustre",pico:true,titulo:"Tatuapé Hall Prime",
+      texto:"O lustre de cristal em espiral é o coração do salão. E o nome de quem celebra pode brilhar projetado na parede."},
+    {t0:11,t1:15,peso:1,rotulo:"O salão",titulo:"Um salão com <em>mezanino.</em>",
+      texto:"Mesas embaixo, vista de cima. De qualquer ponto, seus convidados acompanham cada momento."},
+    {t0:15,t1:18,peso:1,rotulo:"O lounge",titulo:"Cada canto pensado para <em>a foto.</em>",
+      texto:"Flores, luz e sofás para receber bem quem veio celebrar com você."},
+    {t0:18,t1:29,peso:1.2,rotulo:"O buffet",titulo:"A mesa que os convidados <em>comentam.</em>",
+      texto:"Bolo, doces e um buffet elogiado nas avaliações, com nutricionista da venda até o dia do evento.",
+      lista:["Nutricionista","Open bar","Mesa de doces"]},
+    {t0:29,t1:34,peso:1,rotulo:"A pista",titulo:"E a festa <em>começa.</em>",
+      texto:"Pista de LED, telão e iluminação de show. Sem hora para acabar."},
+    {t0:34,t1:39.3,peso:1,rotulo:"As mesas",final:true,titulo:"Sua mesa está <em>pronta.</em>",
+      texto:"Consulte a sua data e venha ver o salão de perto."}
+  ];
+
+  var reduzido=window.matchMedia("(prefers-reduced-motion: reduce)").matches;
+  var toque=window.matchMedia("(pointer: coarse)").matches;
+  var secao=document.querySelector(".caminhada");
+  var video=document.getElementById("video-salao");
+  var legendas=document.getElementById("legendas");
+  var passos=document.querySelector(".passos");
+
+  /* faixa de avaliações: botão de pausa */
+  var faixa=document.getElementById("faixa"),pausa=document.getElementById("faixa-pausa");
+  pausa.addEventListener("click",function(){
+    var p=faixa.classList.toggle("pausada");
+    pausa.setAttribute("aria-pressed",String(p));
+    pausa.setAttribute("aria-label",p?"Retomar a faixa de avaliações":"Pausar a faixa de avaliações");
+    pausa.textContent=p?"▶":"❚❚";
+  });
+
+  /* cristais da abertura (camada 2) */
+  if(!reduzido){
+    var cr=document.getElementById("cristais"),n=toque?7:14;
+    for(var c=0;c<n;c++){
+      var s=document.createElement("span");s.className="cristal";
+      s.style.left=(8+Math.random()*84)+"%";s.style.top=(6+Math.random()*80)+"%";
+      s.style.setProperty("--t",(5+Math.random()*7).toFixed(1)+"s");s.style.setProperty("--a",(-Math.random()*8).toFixed(1)+"s");
+      if(Math.random()>.6){s.style.width=s.style.height="2px"}
+      cr.appendChild(s);
+    }
+  }
+
+  PARADAS.forEach(function(p,i){
+    var el=document.createElement("article");
+    el.className="parada"+(p.pico?" pico":"");
+    el.innerHTML='<p class="rotulo">'+String(i+1).padStart(2,"0")+' · '+p.rotulo+'</p><h2>'+p.titulo+'</h2><p class="txt">'+p.texto+'</p>'+
+      (p.lista?'<ul>'+p.lista.map(function(x){return"<li>"+x+"</li>"}).join("")+'</ul>':"")+
+      (p.final?'<a class="btn btn-cheio js-wpp" href="https://wa.me/5511995557010" target="_blank" rel="noopener">Consultar minha data</a>':"");
+    legendas.appendChild(el);p.el=el;
+    passos.appendChild(document.createElement("i"));
+  });
+  var marcas=passos.querySelectorAll("i");
+
+  /* nome de quem celebra: personaliza o lustre, a última parada e a mensagem do WhatsApp */
+  var nome="";
+  var pico=PARADAS.filter(function(p){return p.pico})[0];
+  var ultima=PARADAS[PARADAS.length-1];
+  function linkWpp(){
+    var msg="Olá! Quero consultar uma data e agendar uma visita ao Tatuapé Hall Prime."+(nome?" O evento é para: "+nome+".":"");
+    return "https://wa.me/5511995557010?text="+encodeURIComponent(msg);
+  }
+  function aplicarNome(){
+    var h=pico.el.querySelector("h2");
+    if(nome){h.textContent=nome}else{h.innerHTML=pico.titulo}
+    ultima.el.querySelector(".txt").textContent=nome?"Consulte a sua data e venha ver o salão preparado para "+nome+".":ultima.texto;
+    document.querySelectorAll(".js-wpp").forEach(function(a){a.href=linkWpp()});
+  }
+  aplicarNome();
+  document.getElementById("nome-form").addEventListener("submit",function(ev){
+    ev.preventDefault();
+    nome=document.getElementById("nome-evento").value.trim().replace(/\s+/g," ").slice(0,32);
+    aplicarNome();destravar();
+    var antes=0,total=0;PARADAS.forEach(function(p){total+=p.peso});
+    for(var i=0;i<PARADAS.length&&!PARADAS[i].pico;i++)antes+=PARADAS[i].peso;
+    var frac=(antes+pico.peso*.45)/total;
+    var percurso=secao.offsetHeight-window.innerHeight;
+    var topo=secao.getBoundingClientRect().top+window.scrollY;
+    window.scrollTo({top:topo+(percurso>0?percurso*frac:0),behavior:reduzido?"auto":"smooth"});
+  });
+
+  /* contadores: mostram o número real parados; contam do zero só quando entram na tela */
+  var fmt=function(v,d){return v.toLocaleString("pt-BR",{minimumFractionDigits:d,maximumFractionDigits:d})};
+  if(!reduzido&&"IntersectionObserver" in window){
+    var io=new IntersectionObserver(function(es){es.forEach(function(e){
+      if(!e.isIntersecting)return;io.unobserve(e.target);
+      var el=e.target,fim=parseFloat(el.dataset.fim),d=parseInt(el.dataset.dec||"0",10),t0=null;
+      function passo(t){if(t0===null)t0=t;var k=Math.min(1,(t-t0)/1600);var ease=k===1?1:1-Math.pow(2,-10*k);el.textContent=fmt(fim*ease,d);if(k<1)requestAnimationFrame(passo)}
+      requestAnimationFrame(passo);
+    })},{threshold:.6});
+    document.querySelectorAll(".contador").forEach(function(el){io.observe(el)});
+  }
+
+  /* spotlight nos cards (só mouse) */
+  if(!toque){document.querySelectorAll(".cartao").forEach(function(c){
+    c.addEventListener("pointermove",function(e){var r=c.getBoundingClientRect();c.style.setProperty("--mx",(e.clientX-r.left)+"px");c.style.setProperty("--my",(e.clientY-r.top)+"px")});
+  })}
+
+  /* vídeo: carrega inteiro para buscar quadro a quadro sem travar */
+  var src="assets/salao.mp4";
+  try{
+    fetch(src).then(function(r){if(!r.ok)throw 0;return r.blob()}).then(function(b){video.src=URL.createObjectURL(b);video.load()}).catch(function(){video.src=src});
+  }catch(e){video.src=src}
+  var destravado=false;
+  function destravar(){
+    if(destravado)return;destravado=true;
+    var pr=video.play();if(pr&&pr.then)pr.then(function(){video.pause()}).catch(function(){});
+  }
+  window.addEventListener("touchstart",destravar,{passive:true,once:true});
+  window.addEventListener("pointerdown",destravar,{once:true});
+
+  if(reduzido){PARADAS.forEach(function(p){p.el.classList.add("ativa")});return}
+
+  var pesoTotal=PARADAS.reduce(function(s,p){return s+p.peso},0);
+  function estado(prog){
+    var alvo=prog*pesoTotal,acc=0;
+    for(var i=0;i<PARADAS.length;i++){
+      var p=PARADAS[i];
+      if(alvo<=acc+p.peso||i===PARADAS.length-1){
+        var f=Math.min(1,Math.max(0,(alvo-acc)/p.peso));
+        return {i:i,tempo:p.t0+(p.t1-p.t0)*f};
+      }
+      acc+=p.peso;
+    }
+  }
+  var atual=-1,tempoAlvo=0,tempoMostrado=0;
+  function medir(){
+    var r=secao.getBoundingClientRect();
+    var percurso=secao.offsetHeight-window.innerHeight;
+    var prog=percurso>0?Math.min(1,Math.max(0,-r.top/percurso)):0;
+    var e=estado(prog);
+    tempoAlvo=e.tempo;
+    if(e.i!==atual){
+      if(atual>=0)PARADAS[atual].el.classList.remove("ativa");
+      PARADAS[e.i].el.classList.add("ativa");atual=e.i;
+      marcas.forEach(function(m,k){m.classList.toggle("feito",k<=atual)});
+    }
+  }
+  function quadro(){
+    tempoMostrado+=(tempoAlvo-tempoMostrado)*.18;
+    if(video.readyState>=1&&!video.seeking&&Math.abs(video.currentTime-tempoMostrado)>.03){
+      try{video.currentTime=tempoMostrado}catch(e){}
+    }
+    requestAnimationFrame(quadro);
+  }
+  window.addEventListener("scroll",medir,{passive:true});
+  window.addEventListener("resize",medir);
+  medir();requestAnimationFrame(quadro);
+})();
+</script>
+<script src="sites-incriveis.js" defer></script>
+<script src="https://cdn.jsdelivr.net/npm/gsap@3.12.5/dist/gsap.min.js" defer></script>
+<script src="https://cdn.jsdelivr.net/npm/gsap@3.12.5/dist/ScrollTrigger.min.js" defer></script>
+<script>
+document.addEventListener("DOMContentLoaded",function(){
+  var w=document.querySelectorAll(".abertura h1 .fx-palavra");if(w.length)w[w.length-1].classList.add("ultima");
+  if(window.matchMedia("(prefers-reduced-motion: reduce)").matches||!window.gsap||!window.ScrollTrigger)return;
+  gsap.registerPlugin(ScrollTrigger);
+  var toque=window.matchMedia("(pointer: coarse)").matches;
+
+  /* 1. Abertura: parallax por profundidade ao sair da tela */
+  var ab={trigger:".abertura",start:"top top",end:"bottom top",scrub:true};
+  gsap.fromTo(".abertura .depth-0",{scale:1.08,yPercent:0},{scale:1.08,yPercent:18,ease:"none",scrollTrigger:ab});
+  gsap.to(".abertura .depth-1",{yPercent:10,ease:"none",scrollTrigger:ab});
+  gsap.to("#cristais",{yPercent:-12,ease:"none",scrollTrigger:ab});
+  gsap.to(".abertura .letreiro-wrap",{y:-70,scale:.94,opacity:.35,ease:"none",scrollTrigger:ab});
+  gsap.to(".abertura .depth-4",{y:-30,ease:"none",scrollTrigger:ab});
+
+  /* 2. A porta oval do letreiro se abre para o salão (iris com clip-path) */
+  gsap.fromTo("#tela",{clipPath:"inset(22% 14% 22% 14% round 50%)"},{clipPath:"inset(0% 0% 0% 0% round 0%)",ease:"none",
+    scrollTrigger:{trigger:".caminhada",start:"top 85%",end:"top top",scrub:true}});
+  gsap.fromTo("#tela video",{scale:1.25},{scale:1,ease:"none",scrollTrigger:{trigger:".caminhada",start:"top 85%",end:"top top",scrub:true}});
+
+  /* 3. Palavras que acendem com a rolagem */
+  var t=document.getElementById("acender");
+  (function dividir(no){Array.prototype.slice.call(no.childNodes).forEach(function(n){
+    if(n.nodeType===3){var f=document.createDocumentFragment();n.textContent.split(/(\s+)/).forEach(function(p){
+      if(/^\s+$/.test(p)||!p){f.appendChild(document.createTextNode(p))}else{var s=document.createElement("span");s.className="w";s.textContent=p;f.appendChild(s)}});n.replaceWith(f)}
+    else if(n.nodeType===1){dividir(n)}})})(t);
+  gsap.fromTo("#acender .w",{opacity:.18},{opacity:1,stagger:.12,ease:"none",scrollTrigger:{trigger:"#acender",start:"top 85%",end:"top 35%",scrub:true}});
+
+  /* 4. Título do convite converge das laterais */
+  var dist=toque?60:180;
+  gsap.fromTo(".conv-a",{x:-dist,opacity:0},{x:0,opacity:1,ease:"none",scrollTrigger:{trigger:".convite .titulo",start:"top 95%",end:"top 55%",scrub:true}});
+  gsap.fromTo(".conv-b",{x:dist,opacity:0},{x:0,opacity:1,ease:"none",scrollTrigger:{trigger:".convite .titulo",start:"top 95%",end:"top 55%",scrub:true}});
+
+  /* 5. Faixa dos números entra com leve profundidade */
+  gsap.fromTo(".grade",{rotateX:12,y:40,transformPerspective:900},{rotateX:0,y:0,ease:"none",scrollTrigger:{trigger:".grade",start:"top 95%",end:"top 60%",scrub:true}});
+});
+</script>
+
+</body>
+</html>
