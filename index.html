@@ -114,7 +114,8 @@ body::before{content:"";position:fixed;inset:0 0 auto;height:env(safe-area-inset
 .palco-fundo{position:absolute;inset:0;background:url(assets/poster.jpg) center/cover;filter:blur(40px) saturate(1.2);opacity:.18;transform:scale(1.2)}
 .palco-brilho{position:absolute;inset:0;background:radial-gradient(ellipse at 50% 55%,rgba(228,203,162,.12),transparent 55%)}
 .tela{position:absolute;inset:0;overflow:hidden;will-change:clip-path}
-.tela canvas{width:100%;height:100%;display:block;background:#0c0a0f url(assets/poster.jpg) center/cover}
+.tela video{width:100%;height:100%;object-fit:cover;display:block;background:#0c0a0f;transition:opacity .35s ease}
+.tela video.troca{opacity:.25}
 .sombra{position:absolute;inset:auto 0 0;height:64%;background:linear-gradient(to top,rgba(12,10,15,.95) 22%,rgba(12,10,15,.55) 60%,transparent);pointer-events:none}
 .sombra-topo{position:absolute;inset:0 0 auto;height:24%;background:linear-gradient(to bottom,rgba(12,10,15,.65),transparent);pointer-events:none}
 .legendas{position:absolute;left:var(--gutter-l);right:var(--gutter-r);bottom:calc(36px + env(safe-area-inset-bottom,0px))}
@@ -269,7 +270,7 @@ body::before{content:"";position:fixed;inset:0 0 auto;height:env(safe-area-inset
       <div class="palco-fundo" data-depth="0" aria-hidden="true"></div>
       <div class="palco-brilho" data-depth="1" aria-hidden="true"></div>
       <div class="tela" data-depth="3" id="tela">
-        <canvas id="quadro-salao" aria-hidden="true"></canvas>
+        <video id="video-salao" muted playsinline autoplay preload="auto" poster="assets/poster.jpg" aria-hidden="true"></video>
         <div class="sombra-topo" aria-hidden="true"></div>
         <div class="sombra" aria-hidden="true"></div>
       </div>
@@ -344,7 +345,7 @@ body::before{content:"";position:fixed;inset:0 0 auto;height:env(safe-area-inset
     {t0:0,t1:2,peso:1,rotulo:"A rua",titulo:"A melhor rua do Tatuapé para <em>eventos.</em>",
       texto:"Sede própria, discreta e fácil de chegar. A noite é só sua e dos seus convidados.",
       lista:["Sem limite de horário","Estacionamento","Privacidade","300 m do metrô"]},
-    {t0:2,t1:3.6,peso:1,rotulo:"A escadaria",titulo:"Uma entrada <em>de cinema.</em>",
+    {t0:1.8,t1:4.4,peso:1,rotulo:"A escadaria",titulo:"Uma entrada <em>de cinema.</em>",
       texto:"Degraus iluminados e todos os olhares na escada. É o momento que vira a foto da noite."},
     {t0:3.6,t1:11,peso:2,rotulo:"O lustre",pico:true,titulo:"Tatuapé Hall Prime",
       texto:"O lustre de cristal em espiral é o coração do salão. E o nome de quem celebra pode brilhar projetado na parede."},
@@ -364,7 +365,7 @@ body::before{content:"";position:fixed;inset:0 0 auto;height:env(safe-area-inset
   var reduzido=window.matchMedia("(prefers-reduced-motion: reduce)").matches;
   var toque=window.matchMedia("(pointer: coarse)").matches;
   var secao=document.querySelector(".caminhada");
-  var tela=document.getElementById("quadro-salao"),ctx=tela.getContext("2d");
+  var video=document.getElementById("video-salao");
   var legendas=document.getElementById("legendas");
   var passos=document.querySelector(".passos");
 
@@ -444,29 +445,23 @@ body::before{content:"";position:fixed;inset:0 0 auto;height:env(safe-area-inset
     c.addEventListener("pointermove",function(e){var r=c.getBoundingClientRect();c.style.setProperty("--mx",(e.clientX-r.left)+"px");c.style.setProperty("--my",(e.clientY-r.top)+"px")});
   })}
 
-  /* vídeo: carrega inteiro para buscar quadro a quadro sem travar */
-  /* sequência de quadros: 4 por segundo do vídeo do salão, desenhados num canvas.
-     Funciona igual em iPhone, Safari, Chrome e Android, sem depender de player de vídeo. */
-  var FPS=4,TOTAL=158,quadros=new Array(TOTAL),prontos=new Array(TOTAL),ultimoDesenhado=-1;
-  function arquivo(i){return "assets/quadros/q"+String(i+1).padStart(3,"0")+".jpg"}
-  function carregar(i){
-    if(quadros[i])return;var im=new Image();quadros[i]=im;im.decoding="async";
-    im.onload=function(){prontos[i]=true;if(ultimoDesenhado<0||Math.abs(i-alvoQuadro())<Math.abs(ultimoDesenhado-alvoQuadro()))desenhar(true)};
-    im.src=arquivo(i);
+  /* vídeo por parada: toca sozinho, liso; ao chegar numa parada pula para o trecho dela e repete em loop.
+     Vídeo mudo com playsinline toca sozinho em iPhone, Android e computador. */
+  video.src=(window.innerWidth<900||toque)?"assets/salao-celular.mp4":"assets/salao.mp4";
+  video.muted=true;
+  var trecho={t0:0,t1:2};
+  function tocar(){var pr=video.play();if(pr&&pr.catch)pr.catch(function(){})}
+  function irPara(p,suave){
+    trecho=p;
+    var pular=function(){try{video.currentTime=p.t0}catch(e){}tocar()};
+    if(suave&&!reduzido){video.classList.add("troca");setTimeout(function(){pular();setTimeout(function(){video.classList.remove("troca")},120)},260)}else pular();
   }
-  var ordem=[],k;for(k=0;k<TOTAL;k+=8)ordem.push(k);for(k=0;k<TOTAL;k+=2)if(k%8)ordem.push(k);for(k=1;k<TOTAL;k+=2)ordem.push(k);
-  (function fila(){var lote=ordem.splice(0,6);lote.forEach(carregar);if(ordem.length)setTimeout(fila,lote.length?120:0)})();
-  function ajustarTela(){var r=tela.getBoundingClientRect(),d=Math.min(window.devicePixelRatio||1,2);tela.width=Math.max(1,Math.round(r.width*d));tela.height=Math.max(1,Math.round(r.height*d));desenhar(true)}
-  function alvoQuadro(){return Math.max(0,Math.min(TOTAL-1,Math.round((tempoMostrado||0)*FPS)))}
-  function desenhar(forcar){
-    var alvo=alvoQuadro(),i=alvo,dist=0;
-    while(!prontos[i]&&dist<TOTAL){dist++;if(alvo-dist>=0&&prontos[alvo-dist]){i=alvo-dist;break}if(alvo+dist<TOTAL&&prontos[alvo+dist]){i=alvo+dist;break}}
-    if(!prontos[i]||(i===ultimoDesenhado&&!forcar))return;
-    var im=quadros[i],cw=tela.width,ch=tela.height,esc=Math.max(cw/im.naturalWidth,ch/im.naturalHeight),w=im.naturalWidth*esc,h=im.naturalHeight*esc;
-    ctx.drawImage(im,(cw-w)/2,(ch-h)/2,w,h);ultimoDesenhado=i;
-  }
-  window.addEventListener("resize",ajustarTela);
-  function destravar(){}
+  video.addEventListener("timeupdate",function(){if(video.currentTime>=trecho.t1-0.08||video.currentTime<trecho.t0-0.5){try{video.currentTime=trecho.t0}catch(e){}}});
+  video.addEventListener("ended",function(){try{video.currentTime=trecho.t0}catch(e){}tocar()});
+  video.addEventListener("loadedmetadata",function(){irPara(trecho,false)});
+  function destravar(){if(video.paused)tocar()}
+  ["touchstart","pointerdown","keydown","scroll"].forEach(function(ev){window.addEventListener(ev,destravar,{passive:true})});
+  document.addEventListener("visibilitychange",function(){if(!document.hidden)tocar()});
   if(reduzido){PARADAS.forEach(function(p){p.el.classList.add("ativa")});return}
 
   var pesoTotal=PARADAS.reduce(function(s,p){return s+p.peso},0);
@@ -481,27 +476,23 @@ body::before{content:"";position:fixed;inset:0 0 auto;height:env(safe-area-inset
       acc+=p.peso;
     }
   }
-  var atual=-1,tempoAlvo=0,tempoMostrado=0;
+  var atual=-1;
   function medir(){
     var r=secao.getBoundingClientRect();
     var percurso=secao.offsetHeight-window.innerHeight;
     var prog=percurso>0?Math.min(1,Math.max(0,-r.top/percurso)):0;
     var e=estado(prog);
-    tempoAlvo=e.tempo;
     if(e.i!==atual){
       if(atual>=0)PARADAS[atual].el.classList.remove("ativa");
-      PARADAS[e.i].el.classList.add("ativa");atual=e.i;
+      PARADAS[e.i].el.classList.add("ativa");
+      var primeira=atual<0;atual=e.i;
       marcas.forEach(function(m,k){m.classList.toggle("feito",k<=atual)});
+      irPara(PARADAS[atual],!primeira);
     }
-  }
-  function quadro(){
-    tempoMostrado+=(tempoAlvo-tempoMostrado)*.18;
-    desenhar(false);
-    requestAnimationFrame(quadro);
   }
   window.addEventListener("scroll",medir,{passive:true});
   window.addEventListener("resize",medir);
-  medir();ajustarTela();requestAnimationFrame(quadro);
+  medir();
 })();
 </script>
 <script src="sites-incriveis.js" defer></script>
@@ -525,7 +516,7 @@ document.addEventListener("DOMContentLoaded",function(){
   /* 2. A porta oval do letreiro se abre para o salão (iris com clip-path) */
   gsap.fromTo("#tela",{clipPath:"inset(22% 14% 22% 14% round 50%)"},{clipPath:"inset(0% 0% 0% 0% round 0%)",ease:"none",
     scrollTrigger:{trigger:".caminhada",start:"top 85%",end:"top top",scrub:true}});
-  gsap.fromTo("#tela canvas",{scale:1.25},{scale:1,ease:"none",scrollTrigger:{trigger:".caminhada",start:"top 85%",end:"top top",scrub:true}});
+  gsap.fromTo("#tela video",{scale:1.25},{scale:1,ease:"none",scrollTrigger:{trigger:".caminhada",start:"top 85%",end:"top top",scrub:true}});
 
   /* 3. Palavras que acendem com a rolagem */
   var t=document.getElementById("acender");
