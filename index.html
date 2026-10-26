@@ -114,8 +114,7 @@ body::before{content:"";position:fixed;inset:0 0 auto;height:env(safe-area-inset
 .palco-fundo{position:absolute;inset:0;background:url(assets/poster.jpg) center/cover;filter:blur(40px) saturate(1.2);opacity:.18;transform:scale(1.2)}
 .palco-brilho{position:absolute;inset:0;background:radial-gradient(ellipse at 50% 55%,rgba(228,203,162,.12),transparent 55%)}
 .tela{position:absolute;inset:0;overflow:hidden;will-change:clip-path}
-.tela video{width:100%;height:100%;object-fit:cover;display:block;background:#0c0a0f;transition:opacity .35s ease}
-.tela video.troca{opacity:.25}
+.tela video{width:100%;height:100%;object-fit:cover;display:block}
 .sombra{position:absolute;inset:auto 0 0;height:64%;background:linear-gradient(to top,rgba(12,10,15,.95) 22%,rgba(12,10,15,.55) 60%,transparent);pointer-events:none}
 .sombra-topo{position:absolute;inset:0 0 auto;height:24%;background:linear-gradient(to bottom,rgba(12,10,15,.65),transparent);pointer-events:none}
 .legendas{position:absolute;left:var(--gutter-l);right:var(--gutter-r);bottom:calc(36px + env(safe-area-inset-bottom,0px))}
@@ -142,6 +141,7 @@ body::before{content:"";position:fixed;inset:0 0 auto;height:env(safe-area-inset
   .parada.pico h2{font-size:clamp(36px,calc(var(--alt) * .1),72px)}
   .parada p.txt{font-size:16px}
   .trilha{top:calc(110px + 4vh + 28px)}
+  .tela video{object-fit:contain;background:#000}
 }
 @supports (height:100dvh){@media (min-width:900px){.caminhada .fx-palco{--alt:calc(100dvh - 110px - 8dvh)}}}
 
@@ -270,7 +270,7 @@ body::before{content:"";position:fixed;inset:0 0 auto;height:env(safe-area-inset
       <div class="palco-fundo" data-depth="0" aria-hidden="true"></div>
       <div class="palco-brilho" data-depth="1" aria-hidden="true"></div>
       <div class="tela" data-depth="3" id="tela">
-        <video id="video-salao" muted playsinline autoplay preload="auto" poster="assets/poster.jpg" aria-hidden="true"></video>
+        <video id="video-salao" muted playsinline preload="auto" poster="assets/poster.jpg" aria-hidden="true"></video>
         <div class="sombra-topo" aria-hidden="true"></div>
         <div class="sombra" aria-hidden="true"></div>
       </div>
@@ -345,7 +345,7 @@ body::before{content:"";position:fixed;inset:0 0 auto;height:env(safe-area-inset
     {t0:0,t1:2,peso:1,rotulo:"A rua",titulo:"A melhor rua do Tatuapé para <em>eventos.</em>",
       texto:"Sede própria, discreta e fácil de chegar. A noite é só sua e dos seus convidados.",
       lista:["Sem limite de horário","Estacionamento","Privacidade","300 m do metrô"]},
-    {t0:1.8,t1:4.4,peso:1,rotulo:"A escadaria",titulo:"Uma entrada <em>de cinema.</em>",
+    {t0:2,t1:3.6,peso:1,rotulo:"A escadaria",titulo:"Uma entrada <em>de cinema.</em>",
       texto:"Degraus iluminados e todos os olhares na escada. É o momento que vira a foto da noite."},
     {t0:3.6,t1:11,peso:2,rotulo:"O lustre",pico:true,titulo:"Tatuapé Hall Prime",
       texto:"O lustre de cristal em espiral é o coração do salão. E o nome de quem celebra pode brilhar projetado na parede."},
@@ -445,23 +445,31 @@ body::before{content:"";position:fixed;inset:0 0 auto;height:env(safe-area-inset
     c.addEventListener("pointermove",function(e){var r=c.getBoundingClientRect();c.style.setProperty("--mx",(e.clientX-r.left)+"px");c.style.setProperty("--my",(e.clientY-r.top)+"px")});
   })}
 
-  /* vídeo por parada: toca sozinho, liso; ao chegar numa parada pula para o trecho dela e repete em loop.
-     Vídeo mudo com playsinline toca sozinho em iPhone, Android e computador. */
-  video.src=(window.innerWidth<900||toque)?"assets/salao-celular.mp4":"assets/salao.mp4";
-  video.muted=true;
-  var trecho={t0:0,t1:2};
-  function tocar(){var pr=video.play();if(pr&&pr.catch)pr.catch(function(){})}
-  function irPara(p,suave){
-    trecho=p;
-    var pular=function(){try{video.currentTime=p.t0}catch(e){}tocar()};
-    if(suave&&!reduzido){video.classList.add("troca");setTimeout(function(){pular();setTimeout(function(){video.classList.remove("troca")},120)},260)}else pular();
+  /* vídeo: carrega inteiro para buscar quadro a quadro sem travar */
+  /* vídeo: versão leve no celular; carrega inteiro para avançar quadro a quadro.
+     Safari/iPhone só mostram os quadros depois de um play, então destravamos assim que o vídeo chega
+     (vídeo mudo pode tocar sem toque) e tentamos de novo a cada toque até dar certo. */
+  var src=(window.innerWidth<900||toque)?"assets/salao-celular.mp4":"assets/salao.mp4";
+  var destravado=false;
+  function destravar(){
+    if(destravado||!video.currentSrc)return;
+    video.muted=true;
+    var pr=video.play();
+    if(pr&&pr.then){pr.then(function(){video.pause();destravado=true;video.currentTime=tempoMostrado||0}).catch(function(){})}
+    else{video.pause();destravado=true}
   }
-  video.addEventListener("timeupdate",function(){if(video.currentTime>=trecho.t1-0.08||video.currentTime<trecho.t0-0.5){try{video.currentTime=trecho.t0}catch(e){}}});
-  video.addEventListener("ended",function(){try{video.currentTime=trecho.t0}catch(e){}tocar()});
-  video.addEventListener("loadedmetadata",function(){irPara(trecho,false)});
-  function destravar(){if(video.paused)tocar()}
-  ["touchstart","pointerdown","keydown","scroll"].forEach(function(ev){window.addEventListener(ev,destravar,{passive:true})});
-  document.addEventListener("visibilitychange",function(){if(!document.hidden)tocar()});
+  function usar(url){
+    video.muted=true;video.setAttribute("muted","");video.setAttribute("playsinline","");video.setAttribute("webkit-playsinline","");
+    video.src=url;video.load();
+    ["loadedmetadata","canplay","loadeddata"].forEach(function(ev){video.addEventListener(ev,destravar,{once:true})});
+    destravar();
+  }
+  var trocou=false;
+  var reserva=setTimeout(function(){if(!trocou){trocou=true;usar(src)}},9000);
+  try{
+    fetch(src).then(function(r){if(!r.ok)throw 0;return r.blob()}).then(function(b){if(trocou)return;trocou=true;clearTimeout(reserva);usar(URL.createObjectURL(b))}).catch(function(){if(!trocou){trocou=true;clearTimeout(reserva);usar(src)}});
+  }catch(e){trocou=true;usar(src)}
+  ["touchstart","pointerdown","keydown"].forEach(function(ev){window.addEventListener(ev,destravar,{passive:true})});
   if(reduzido){PARADAS.forEach(function(p){p.el.classList.add("ativa")});return}
 
   var pesoTotal=PARADAS.reduce(function(s,p){return s+p.peso},0);
@@ -476,23 +484,29 @@ body::before{content:"";position:fixed;inset:0 0 auto;height:env(safe-area-inset
       acc+=p.peso;
     }
   }
-  var atual=-1;
+  var atual=-1,tempoAlvo=0,tempoMostrado=0;
   function medir(){
     var r=secao.getBoundingClientRect();
     var percurso=secao.offsetHeight-window.innerHeight;
     var prog=percurso>0?Math.min(1,Math.max(0,-r.top/percurso)):0;
     var e=estado(prog);
+    tempoAlvo=e.tempo;
     if(e.i!==atual){
       if(atual>=0)PARADAS[atual].el.classList.remove("ativa");
-      PARADAS[e.i].el.classList.add("ativa");
-      var primeira=atual<0;atual=e.i;
+      PARADAS[e.i].el.classList.add("ativa");atual=e.i;
       marcas.forEach(function(m,k){m.classList.toggle("feito",k<=atual)});
-      irPara(PARADAS[atual],!primeira);
     }
+  }
+  function quadro(){
+    tempoMostrado+=(tempoAlvo-tempoMostrado)*.18;
+    if(video.readyState>=1&&!video.seeking&&Math.abs(video.currentTime-tempoMostrado)>.03){
+      try{video.currentTime=tempoMostrado}catch(e){}
+    }
+    requestAnimationFrame(quadro);
   }
   window.addEventListener("scroll",medir,{passive:true});
   window.addEventListener("resize",medir);
-  medir();
+  medir();requestAnimationFrame(quadro);
 })();
 </script>
 <script src="sites-incriveis.js" defer></script>
