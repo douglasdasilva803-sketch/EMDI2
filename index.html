@@ -216,6 +216,17 @@ body::before{content:"";position:fixed;inset:0 0 auto;height:env(safe-area-inset
   *,*::before,*::after{animation-duration:.01ms!important;animation-iteration-count:1!important;transition-duration:.01ms!important;scroll-behavior:auto!important}
   .cristal{display:none}
 }
+
+/* efeitos de entrada (só com movimento liberado) */
+@media (prefers-reduced-motion:no-preference){
+  .fx-js .acender .w{opacity:.18;transition:opacity .7s ease}
+  .fx-js .acender.vis .w{opacity:1}
+  .fx-js .convite .titulo span{transition:transform 1.1s cubic-bezier(.22,1,.36,1),opacity 1.1s ease}
+  .fx-js .convite .titulo .conv-a{transform:translateX(-40px);opacity:0}
+  .fx-js .convite .titulo .conv-b{transform:translateX(40px);opacity:0;transition-delay:.15s}
+  .fx-js .convite .titulo.vis span{transform:none;opacity:1}
+}
+.letreiro-wrap{will-change:opacity}
 </style>
 
 </head>
@@ -528,43 +539,46 @@ body::before{content:"";position:fixed;inset:0 0 auto;height:env(safe-area-inset
 })();
 </script>
 <script src="sites-incriveis.js" defer></script>
-<script src="https://cdn.jsdelivr.net/npm/gsap@3.12.5/dist/gsap.min.js" defer></script>
-<script src="https://cdn.jsdelivr.net/npm/gsap@3.12.5/dist/ScrollTrigger.min.js" defer></script>
 <script>
+/* Efeitos de rolagem feitos à mão (sem biblioteca externa): calculados a cada quadro a partir da
+   posição real das seções, então sempre terminam certos, mesmo depois de fontes e vídeo carregarem. */
 document.addEventListener("DOMContentLoaded",function(){
   var w=document.querySelectorAll(".abertura h1 .fx-palavra");if(w.length)w[w.length-1].classList.add("ultima");
-  if(window.matchMedia("(prefers-reduced-motion: reduce)").matches||!window.gsap||!window.ScrollTrigger)return;
-  gsap.registerPlugin(ScrollTrigger);
-  var toque=window.matchMedia("(pointer: coarse)").matches;
-
-  /* 1. Abertura: parallax por profundidade ao sair da tela */
-  var ab={trigger:".abertura",start:"top top",end:"bottom top",scrub:true};
-  gsap.fromTo(".abertura .depth-0",{scale:1.08,yPercent:0},{scale:1.08,yPercent:18,ease:"none",scrollTrigger:ab});
-  gsap.to(".abertura .depth-1",{yPercent:10,ease:"none",scrollTrigger:ab});
-  gsap.to("#cristais",{yPercent:-12,ease:"none",scrollTrigger:ab});
-  gsap.to(".abertura .letreiro-wrap",{y:-70,scale:.94,opacity:.35,ease:"none",scrollTrigger:ab});
-  gsap.to(".abertura .depth-4",{y:-30,ease:"none",scrollTrigger:ab});
-
-  /* 2. A porta oval do letreiro se abre para o salão (iris com clip-path) */
-  gsap.fromTo("#tela",{clipPath:"inset(22% 14% 22% 14% round 50%)"},{clipPath:"inset(0% 0% 0% 0% round 0%)",ease:"none",
-    scrollTrigger:{trigger:".caminhada",start:"top 85%",end:"top top",scrub:true}});
-  gsap.fromTo("#tela .vwrap",{scale:1.25},{scale:1,ease:"none",scrollTrigger:{trigger:".caminhada",start:"top 85%",end:"top top",scrub:true}});
-
-  /* 3. Palavras que acendem com a rolagem */
+  var raiz=document.documentElement;raiz.classList.add("fx-js");
+  var reduzido=window.matchMedia("(prefers-reduced-motion: reduce)").matches;
+  /* palavras do título "25 anos" */
   var t=document.getElementById("acender");
   (function dividir(no){Array.prototype.slice.call(no.childNodes).forEach(function(n){
     if(n.nodeType===3){var f=document.createDocumentFragment();n.textContent.split(/(\s+)/).forEach(function(p){
       if(/^\s+$/.test(p)||!p){f.appendChild(document.createTextNode(p))}else{var s=document.createElement("span");s.className="w";s.textContent=p;f.appendChild(s)}});n.replaceWith(f)}
     else if(n.nodeType===1){dividir(n)}})})(t);
-  gsap.fromTo("#acender .w",{opacity:.18},{opacity:1,stagger:.12,ease:"none",scrollTrigger:{trigger:"#acender",start:"top 85%",end:"top 35%",scrub:true}});
-
-  /* 4. Título do convite converge das laterais */
-  var dist=toque?60:180;
-  gsap.fromTo(".conv-a",{x:-dist,opacity:0},{x:0,opacity:1,ease:"none",scrollTrigger:{trigger:".convite .titulo",start:"top 95%",end:"top 55%",scrub:true}});
-  gsap.fromTo(".conv-b",{x:dist,opacity:0},{x:0,opacity:1,ease:"none",scrollTrigger:{trigger:".convite .titulo",start:"top 95%",end:"top 55%",scrub:true}});
-
-  /* 5. Faixa dos números entra com leve profundidade */
-  gsap.fromTo(".grade",{rotateX:12,y:40,transformPerspective:900},{rotateX:0,y:0,ease:"none",scrollTrigger:{trigger:".grade",start:"top 95%",end:"top 60%",scrub:true}});
+  t.querySelectorAll(".w").forEach(function(el,i){el.style.transitionDelay=(i*90)+"ms"});
+  /* entradas que acontecem uma vez quando a seção aparece */
+  var alvos=[t,document.querySelector(".convite .titulo")];
+  if(reduzido||!("IntersectionObserver" in window)){alvos.forEach(function(a){a.classList.add("vis")})}
+  else{var io=new IntersectionObserver(function(es){es.forEach(function(e){if(e.isIntersecting){e.target.classList.add("vis");io.unobserve(e.target)}})},{threshold:.35});alvos.forEach(function(a){io.observe(a)})}
+  if(reduzido)return;
+  /* profundidade da abertura + porta oval que se abre para o salão */
+  var ab=document.querySelector(".abertura"),d0=ab.querySelector(".depth-0"),d1=ab.querySelector(".depth-1"),cr=document.getElementById("cristais"),
+      letreiro=ab.querySelector(".letreiro-wrap"),texto=ab.querySelector(".depth-4"),cam=document.querySelector(".caminhada"),
+      tela=document.getElementById("tela"),vw=tela.querySelector(".vwrap"),pedido=false;
+  function lim(x){return x<0?0:x>1?1:x}
+  function atualizar(){
+    pedido=false;var vh=window.innerHeight;
+    var r=ab.getBoundingClientRect(),p=lim(-r.top/Math.max(1,r.height));
+    d0.style.transform="translate3d(0,"+(p*18).toFixed(2)+"%,0) scale(1.08)";
+    d1.style.transform="translate3d(0,"+(p*10).toFixed(2)+"%,0)";
+    cr.style.transform="translate3d(0,"+(-p*12).toFixed(2)+"%,0)";
+    letreiro.style.opacity=(1-p*.65).toFixed(3);
+    texto.style.transform="translate3d(0,"+(-p*30).toFixed(1)+"px,0)";
+    var c=cam.getBoundingClientRect(),q=lim((vh*.85-c.top)/(vh*.85)),k=1-q;
+    tela.style.clipPath=tela.style.webkitClipPath=q>=1?"none":"inset("+(22*k).toFixed(2)+"% "+(14*k).toFixed(2)+"% "+(22*k).toFixed(2)+"% "+(14*k).toFixed(2)+"% round "+(50*k).toFixed(2)+"%)";
+    vw.style.transform="scale("+(1.25-.25*q).toFixed(4)+")";
+  }
+  function pedir(){if(!pedido){pedido=true;requestAnimationFrame(atualizar)}}
+  window.addEventListener("scroll",pedir,{passive:true});window.addEventListener("resize",pedir);window.addEventListener("load",pedir);
+  if(document.fonts&&document.fonts.ready)document.fonts.ready.then(pedir);
+  atualizar();
 });
 </script>
 
