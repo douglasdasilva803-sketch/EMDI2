@@ -227,6 +227,23 @@ body::before{content:"";position:fixed;inset:0 0 auto;height:env(safe-area-inset
   .fx-js .convite .titulo.vis span{transform:none;opacity:1}
 }
 .letreiro-wrap{will-change:opacity}
+
+/* diferenciais e galeria */
+.sem-limite{margin:36px 0 0;color:var(--nevoa);font-size:18px;max-width:40ch}
+.sem-limite em{font:italic 400 1.25em/1 var(--f-display);color:var(--champanhe)}
+.galeria-wrap{margin:64px calc(-1 * var(--gutter-r)) 0 calc(-1 * var(--gutter-l));padding-left:var(--gutter-l)}
+.galeria{display:flex;gap:16px;overflow-x:auto;scroll-snap-type:x mandatory;padding:4px var(--gutter-r) 18px 0;scrollbar-width:none;-webkit-overflow-scrolling:touch;outline:none}
+.galeria::-webkit-scrollbar{display:none}
+.foto{flex:0 0 min(72vw,300px);margin:0;scroll-snap-align:start;position:relative;border-radius:2px;overflow:hidden;box-shadow:0 0 0 1px var(--linha)}
+.foto img{display:block;width:100%;height:auto;aspect-ratio:720/996;object-fit:cover;max-width:100%;transition:transform 1.2s cubic-bezier(.22,1,.36,1)}
+.foto:hover img{transform:scale(1.04)}
+.foto figcaption{position:absolute;left:0;right:0;bottom:0;padding:48px 16px 16px;background:linear-gradient(to top,rgba(12,10,15,.9),transparent);font:italic 400 20px/1.2 var(--f-display);color:var(--marfim)}
+@media (min-width:1100px){.galeria-wrap{padding-left:0;margin-inline:0}.galeria{max-width:1120px;margin-inline:auto;padding-right:0}.foto{flex-basis:calc((100% - 32px)/3)}}
+.numeros .formatos{margin-top:56px}
+.galeria-nav{display:none}
+@media (min-width:1100px){.galeria-nav{display:flex;justify-content:center;gap:12px;margin-top:20px}}
+.seta{width:44px;height:44px;border-radius:50%;border:1px solid var(--fio);background:transparent;color:var(--champanhe);font:400 24px/1 var(--f-display);cursor:pointer;transition:background .3s,color .3s}
+.seta:hover{background:var(--champanhe);color:var(--noite)}
 </style>
 
 </head>
@@ -271,7 +288,6 @@ body::before{content:"";position:fixed;inset:0 0 auto;height:env(safe-area-inset
             <input id="nome-evento" name="nome" type="text" maxlength="32" placeholder="Ex.: Ana &amp; Pedro">
             <button class="btn btn-cheio" type="submit">Ver o salão</button>
           </div>
-          <p class="prova"><b>★★★★★</b><strong>4,8</strong> no Google · 787 avaliações</p>
         </form>
       </div>
     </div>
@@ -298,10 +314,27 @@ body::before{content:"";position:fixed;inset:0 0 auto;height:env(safe-area-inset
       <h2 class="titulo acender" id="acender">25 anos fazendo as noites mais bonitas do <em>Tatuapé.</em></h2>
       <div class="grade">
         <div class="num" data-fx="subir"><strong><span class="contador" data-fim="25">25</span><sup>anos</sup></strong><span>de experiência</span></div>
-        <div class="num" data-fx="subir" data-fx-atraso="100"><strong><span class="contador" data-fim="4.8" data-dec="1">4,8</span><sup>★</sup></strong><span>nota no Google</span></div>
-        <div class="num" data-fx="subir" data-fx-atraso="200"><strong><span class="contador" data-fim="787">787</span></strong><span>avaliações</span></div>
-        <div class="num" data-fx="subir" data-fx-atraso="300"><strong><span class="contador" data-fim="16">16</span><sup>mil</sup></strong><span>seguidores</span></div>
+        <div class="num" data-fx="subir" data-fx-atraso="100"><strong><span class="contador" data-fim="300">300</span><sup>m</sup></strong><span>do metrô</span></div>
+        <div class="num" data-fx="subir" data-fx-atraso="200"><strong><span class="contador" data-fim="100">100</span><sup>m</sup></strong><span>da Radial Leste</span></div>
+        <div class="num" data-fx="subir" data-fx-atraso="300"><strong><span class="contador" data-fim="16">16</span><sup>mil</sup></strong><span>seguidores no Instagram</span></div>
       </div>
+      <p class="sem-limite" data-fx="surgir">Festa <em>sem limite de horário</em>, com estacionamento e privacidade.</p>
+    </div>
+    <div class="galeria-wrap">
+      <div class="galeria" id="galeria" tabindex="0" aria-label="Fotos do salão">
+        <figure class="foto"><img src="assets/fotos/lustre.jpg" alt="O lustre de cristal do Tatuapé Hall Prime" loading="lazy" width="720" height="996"><figcaption>O lustre de cristal</figcaption></figure>
+        <figure class="foto"><img src="assets/fotos/escadaria.jpg" alt="A escadaria de entrada do Tatuapé Hall Prime" loading="lazy" width="720" height="996"><figcaption>A escadaria de entrada</figcaption></figure>
+        <figure class="foto"><img src="assets/fotos/lounge.jpg" alt="O lounge florido do Tatuapé Hall Prime" loading="lazy" width="720" height="996"><figcaption>O lounge florido</figcaption></figure>
+        <figure class="foto"><img src="assets/fotos/bolo.jpg" alt="A mesa do bolo do Tatuapé Hall Prime" loading="lazy" width="720" height="996"><figcaption>A mesa do bolo</figcaption></figure>
+        <figure class="foto"><img src="assets/fotos/pista.jpg" alt="O mezanino e a pista do Tatuapé Hall Prime" loading="lazy" width="720" height="996"><figcaption>O mezanino e a pista</figcaption></figure>
+        <figure class="foto"><img src="assets/fotos/mesas.jpg" alt="As mesas postas do Tatuapé Hall Prime" loading="lazy" width="720" height="996"><figcaption>As mesas postas</figcaption></figure>
+      </div>
+      <div class="galeria-nav" aria-hidden="false">
+        <button type="button" class="seta" id="gal-ant" aria-label="Fotos anteriores">‹</button>
+        <button type="button" class="seta" id="gal-prox" aria-label="Próximas fotos">›</button>
+      </div>
+    </div>
+    <div class="miolo centro">
       <p class="formatos" data-fx="surgir">Debutantes <i aria-hidden="true">✦</i> Casamentos <i aria-hidden="true">✦</i> Corporativos <i aria-hidden="true">✦</i> Aniversários <i aria-hidden="true">✦</i> Formaturas</p>
     </div>
   </section>
@@ -332,7 +365,6 @@ body::before{content:"";position:fixed;inset:0 0 auto;height:env(safe-area-inset
         <a class="btn btn-cheio js-wpp" href="https://wa.me/5511995557010" target="_blank" rel="noopener">Consultar minha data</a>
         <a class="btn btn-linha" href="https://www.instagram.com/tatuapehallprimeoficial/" target="_blank" rel="noopener">Ver o Instagram</a>
       </div>
-      <p class="prova" data-fx="surgir"><b>★★★★★</b><strong>4,8</strong> · 787 avaliações no Google</p>
       <div class="ficha" data-fx="surgir">
         <div><span class="rotulo">Endereço</span><strong>R. Antônio de Barros, 644<br>Tatuapé</strong></div>
         <div><span class="rotulo">WhatsApp</span><strong>(11) 99555-7010</strong></div>
@@ -557,6 +589,10 @@ document.addEventListener("DOMContentLoaded",function(){
   var alvos=[t,document.querySelector(".convite .titulo")];
   if(reduzido||!("IntersectionObserver" in window)){alvos.forEach(function(a){a.classList.add("vis")})}
   else{var io=new IntersectionObserver(function(es){es.forEach(function(e){if(e.isIntersecting){e.target.classList.add("vis");io.unobserve(e.target)}})},{threshold:.35});alvos.forEach(function(a){io.observe(a)})}
+  var gal=document.getElementById("galeria");
+  function passoGal(d){var f=gal.querySelector(".foto");gal.scrollBy({left:d*(f?f.getBoundingClientRect().width+16:300),behavior:"smooth"})}
+  document.getElementById("gal-ant").addEventListener("click",function(){passoGal(-1)});
+  document.getElementById("gal-prox").addEventListener("click",function(){passoGal(1)});
   if(reduzido)return;
   /* profundidade da abertura + porta oval que se abre para o salão */
   var ab=document.querySelector(".abertura"),d0=ab.querySelector(".depth-0"),d1=ab.querySelector(".depth-1"),cr=document.getElementById("cristais"),
