@@ -114,7 +114,8 @@ body::before{content:"";position:fixed;inset:0 0 auto;height:env(safe-area-inset
 .palco-fundo{position:absolute;inset:0;background:url(assets/poster.jpg) center/cover;filter:blur(40px) saturate(1.2);opacity:.18;transform:scale(1.2)}
 .palco-brilho{position:absolute;inset:0;background:radial-gradient(ellipse at 50% 55%,rgba(228,203,162,.12),transparent 55%)}
 .tela{position:absolute;inset:0;overflow:hidden;will-change:clip-path}
-.tela video{width:100%;height:100%;object-fit:cover;display:block}
+.vwrap{position:absolute;inset:0}
+.tela video{position:absolute;inset:0;width:100%;height:100%;object-fit:cover;display:block;background:#0c0a0f url(assets/inicio.jpg) center/cover;transition:opacity .25s ease}
 .sombra{position:absolute;inset:auto 0 0;height:64%;background:linear-gradient(to top,rgba(12,10,15,.95) 22%,rgba(12,10,15,.55) 60%,transparent);pointer-events:none}
 .sombra-topo{position:absolute;inset:0 0 auto;height:24%;background:linear-gradient(to bottom,rgba(12,10,15,.65),transparent);pointer-events:none}
 .legendas{position:absolute;left:var(--gutter-l);right:var(--gutter-r);bottom:calc(36px + env(safe-area-inset-bottom,0px))}
@@ -270,7 +271,7 @@ body::before{content:"";position:fixed;inset:0 0 auto;height:env(safe-area-inset
       <div class="palco-fundo" data-depth="0" aria-hidden="true"></div>
       <div class="palco-brilho" data-depth="1" aria-hidden="true"></div>
       <div class="tela" data-depth="3" id="tela">
-        <video id="video-salao" muted playsinline preload="auto" poster="assets/poster.jpg" aria-hidden="true"></video>
+        <div class="vwrap" aria-hidden="true"><video id="video-salao" muted playsinline webkit-playsinline preload="auto" poster="assets/inicio.jpg"></video></div>
         <div class="sombra-topo" aria-hidden="true"></div>
         <div class="sombra" aria-hidden="true"></div>
       </div>
@@ -446,30 +447,47 @@ body::before{content:"";position:fixed;inset:0 0 auto;height:env(safe-area-inset
   })}
 
   /* vídeo: carrega inteiro para buscar quadro a quadro sem travar */
-  /* vídeo: versão leve no celular; carrega inteiro para avançar quadro a quadro.
-     Safari/iPhone só mostram os quadros depois de um play, então destravamos assim que o vídeo chega
-     (vídeo mudo pode tocar sem toque) e tentamos de novo a cada toque até dar certo. */
+  /* vídeo: começa a tocar na hora (streaming) e responde à rolagem desde o primeiro segundo.
+     Em segundo plano baixamos o arquivo inteiro; quando chega, um segundo player assume no mesmo
+     quadro, sem piscar, e a rolagem fica 100% lisa. Safari/iPhone exigem um play mudo para liberar
+     os quadros: fazemos isso sozinhos e repetimos a cada toque até dar certo. */
   var src=(window.innerWidth<900||toque)?"assets/salao-celular.mp4":"assets/salao.mp4";
-  var destravado=false;
-  function destravar(){
-    if(destravado||!video.currentSrc)return;
-    video.muted=true;
-    var pr=video.play();
-    if(pr&&pr.then){pr.then(function(){video.pause();destravado=true;video.currentTime=tempoMostrado||0}).catch(function(){})}
-    else{video.pause();destravado=true}
+  function preparar(v){
+    v.muted=true;v.defaultMuted=true;v.setAttribute("muted","");v.setAttribute("playsinline","");v.setAttribute("webkit-playsinline","");v.preload="auto";
   }
-  function usar(url){
-    video.muted=true;video.setAttribute("muted","");video.setAttribute("playsinline","");video.setAttribute("webkit-playsinline","");
-    video.src=url;video.load();
-    ["loadedmetadata","canplay","loadeddata"].forEach(function(ev){video.addEventListener(ev,destravar,{once:true})});
-    destravar();
+  function liberar(v,depois){
+    var pr;try{pr=v.play()}catch(e){}
+    if(pr&&pr.then){pr.then(function(){v.pause();v._livre=true;if(depois)depois()}).catch(function(){})}
+    else{try{v.pause()}catch(e){}v._livre=true;if(depois)depois()}
   }
-  var trocou=false;
-  var reserva=setTimeout(function(){if(!trocou){trocou=true;usar(src)}},9000);
-  try{
-    fetch(src).then(function(r){if(!r.ok)throw 0;return r.blob()}).then(function(b){if(trocou)return;trocou=true;clearTimeout(reserva);usar(URL.createObjectURL(b))}).catch(function(){if(!trocou){trocou=true;clearTimeout(reserva);usar(src)}});
-  }catch(e){trocou=true;usar(src)}
+  function destravar(){if(!video._livre)liberar(video,function(){try{video.currentTime=tempoMostrado||0}catch(e){}})}
+  preparar(video);video.src=src;video.load();
+  ["loadedmetadata","loadeddata","canplay"].forEach(function(ev){video.addEventListener(ev,destravar)});
+  destravar();
   ["touchstart","pointerdown","keydown"].forEach(function(ev){window.addEventListener(ev,destravar,{passive:true})});
+  try{
+    fetch(src).then(function(r){if(!r.ok)throw 0;return r.blob()}).then(function(b){
+      var v2=document.createElement("video");preparar(v2);v2.style.opacity="0";v2.setAttribute("aria-hidden","true");
+      video.parentNode.appendChild(v2);
+      var feito=false;
+      function assumir(){
+        if(feito)return;feito=true;
+        v2.style.opacity="1";var velho=video;video=v2;
+        setTimeout(function(){if(velho.parentNode)velho.parentNode.removeChild(velho);velho.removeAttribute("src");velho.load()},300);
+      }
+      var iniciado=false;
+      function pronto(){
+        if(iniciado)return;iniciado=true;
+        liberar(v2,function(){
+          try{v2.currentTime=tempoMostrado||0}catch(e){}
+          v2.addEventListener("seeked",assumir,{once:true});setTimeout(assumir,700);
+        });
+      }
+      v2.addEventListener("loadeddata",pronto,{once:true});
+      v2.src=URL.createObjectURL(b);v2.load();
+      setTimeout(pronto,500);
+    }).catch(function(){});
+  }catch(e){}
   if(reduzido){PARADAS.forEach(function(p){p.el.classList.add("ativa")});return}
 
   var pesoTotal=PARADAS.reduce(function(s,p){return s+p.peso},0);
@@ -530,7 +548,7 @@ document.addEventListener("DOMContentLoaded",function(){
   /* 2. A porta oval do letreiro se abre para o salão (iris com clip-path) */
   gsap.fromTo("#tela",{clipPath:"inset(22% 14% 22% 14% round 50%)"},{clipPath:"inset(0% 0% 0% 0% round 0%)",ease:"none",
     scrollTrigger:{trigger:".caminhada",start:"top 85%",end:"top top",scrub:true}});
-  gsap.fromTo("#tela video",{scale:1.25},{scale:1,ease:"none",scrollTrigger:{trigger:".caminhada",start:"top 85%",end:"top top",scrub:true}});
+  gsap.fromTo("#tela .vwrap",{scale:1.25},{scale:1,ease:"none",scrollTrigger:{trigger:".caminhada",start:"top 85%",end:"top top",scrub:true}});
 
   /* 3. Palavras que acendem com a rolagem */
   var t=document.getElementById("acender");
