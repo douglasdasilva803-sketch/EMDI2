@@ -114,7 +114,7 @@ body::before{content:"";position:fixed;inset:0 0 auto;height:env(safe-area-inset
 .palco-fundo{position:absolute;inset:0;background:url(assets/poster.jpg) center/cover;filter:blur(40px) saturate(1.2);opacity:.18;transform:scale(1.2)}
 .palco-brilho{position:absolute;inset:0;background:radial-gradient(ellipse at 50% 55%,rgba(228,203,162,.12),transparent 55%)}
 .tela{position:absolute;inset:0;overflow:hidden;will-change:clip-path}
-.tela video{width:100%;height:100%;object-fit:cover;display:block}
+.tela canvas{width:100%;height:100%;display:block;background:#0c0a0f url(assets/poster.jpg) center/cover}
 .sombra{position:absolute;inset:auto 0 0;height:64%;background:linear-gradient(to top,rgba(12,10,15,.95) 22%,rgba(12,10,15,.55) 60%,transparent);pointer-events:none}
 .sombra-topo{position:absolute;inset:0 0 auto;height:24%;background:linear-gradient(to bottom,rgba(12,10,15,.65),transparent);pointer-events:none}
 .legendas{position:absolute;left:var(--gutter-l);right:var(--gutter-r);bottom:calc(36px + env(safe-area-inset-bottom,0px))}
@@ -141,7 +141,6 @@ body::before{content:"";position:fixed;inset:0 0 auto;height:env(safe-area-inset
   .parada.pico h2{font-size:clamp(36px,calc(var(--alt) * .1),72px)}
   .parada p.txt{font-size:16px}
   .trilha{top:calc(110px + 4vh + 28px)}
-  .tela video{object-fit:contain;background:#000}
 }
 @supports (height:100dvh){@media (min-width:900px){.caminhada .fx-palco{--alt:calc(100dvh - 110px - 8dvh)}}}
 
@@ -222,10 +221,10 @@ body::before{content:"";position:fixed;inset:0 0 auto;height:env(safe-area-inset
 <a class="pular skip-link" href="#inicio">Pular para o conteúdo</a>
 <header class="topo">
   <div class="faixa" id="faixa">
-    <div class="faixa-janela" aria-label="Avaliações no Google: nota 4,8 com 781 avaliações">
+    <div class="faixa-janela" aria-label="Avaliações no Google: nota 4,8 com 787 avaliações">
       <div class="faixa-trilho" aria-hidden="true">
-        <span class="grupo"><b>★★★★★</b><strong>4,8 no Google</strong><i>781 avaliações</i><em>Ambiente bonito e bem estruturado</em><i class="sep">✦</i><em>Comida e open bar elogiados</em><i class="sep">✦</i><em>Organização impecável</em><i class="sep">✦</i><em>Equipe atenciosa e profissional</em><i class="sep">✦</i></span>
-        <span class="grupo"><b>★★★★★</b><strong>4,8 no Google</strong><i>781 avaliações</i><em>Ambiente bonito e bem estruturado</em><i class="sep">✦</i><em>Comida e open bar elogiados</em><i class="sep">✦</i><em>Organização impecável</em><i class="sep">✦</i><em>Equipe atenciosa e profissional</em><i class="sep">✦</i></span>
+        <span class="grupo"><b>★★★★★</b><strong>4,8 no Google</strong><i>787 avaliações</i><em>Ambiente bonito e bem estruturado</em><i class="sep">✦</i><em>Comida e open bar elogiados</em><i class="sep">✦</i><em>Organização impecável</em><i class="sep">✦</i><em>Equipe atenciosa e profissional</em><i class="sep">✦</i></span>
+        <span class="grupo"><b>★★★★★</b><strong>4,8 no Google</strong><i>787 avaliações</i><em>Ambiente bonito e bem estruturado</em><i class="sep">✦</i><em>Comida e open bar elogiados</em><i class="sep">✦</i><em>Organização impecável</em><i class="sep">✦</i><em>Equipe atenciosa e profissional</em><i class="sep">✦</i></span>
       </div>
     </div>
     <button class="faixa-pausa" type="button" id="faixa-pausa" aria-pressed="false" aria-label="Pausar a faixa de avaliações">❚❚</button>
@@ -259,7 +258,7 @@ body::before{content:"";position:fixed;inset:0 0 auto;height:env(safe-area-inset
             <input id="nome-evento" name="nome" type="text" maxlength="32" placeholder="Ex.: Ana &amp; Pedro">
             <button class="btn btn-cheio" type="submit">Ver o salão</button>
           </div>
-          <p class="prova"><b>★★★★★</b><strong>4,8</strong> no Google · 781 avaliações</p>
+          <p class="prova"><b>★★★★★</b><strong>4,8</strong> no Google · 787 avaliações</p>
         </form>
       </div>
     </div>
@@ -270,7 +269,7 @@ body::before{content:"";position:fixed;inset:0 0 auto;height:env(safe-area-inset
       <div class="palco-fundo" data-depth="0" aria-hidden="true"></div>
       <div class="palco-brilho" data-depth="1" aria-hidden="true"></div>
       <div class="tela" data-depth="3" id="tela">
-        <video id="video-salao" muted playsinline preload="auto" poster="assets/poster.jpg" aria-hidden="true"></video>
+        <canvas id="quadro-salao" aria-hidden="true"></canvas>
         <div class="sombra-topo" aria-hidden="true"></div>
         <div class="sombra" aria-hidden="true"></div>
       </div>
@@ -287,7 +286,7 @@ body::before{content:"";position:fixed;inset:0 0 auto;height:env(safe-area-inset
       <div class="grade">
         <div class="num" data-fx="subir"><strong><span class="contador" data-fim="25">25</span><sup>anos</sup></strong><span>de experiência</span></div>
         <div class="num" data-fx="subir" data-fx-atraso="100"><strong><span class="contador" data-fim="4.8" data-dec="1">4,8</span><sup>★</sup></strong><span>nota no Google</span></div>
-        <div class="num" data-fx="subir" data-fx-atraso="200"><strong><span class="contador" data-fim="781">781</span></strong><span>avaliações</span></div>
+        <div class="num" data-fx="subir" data-fx-atraso="200"><strong><span class="contador" data-fim="787">787</span></strong><span>avaliações</span></div>
         <div class="num" data-fx="subir" data-fx-atraso="300"><strong><span class="contador" data-fim="16">16</span><sup>mil</sup></strong><span>seguidores</span></div>
       </div>
       <p class="formatos" data-fx="surgir">Debutantes <i aria-hidden="true">✦</i> Casamentos <i aria-hidden="true">✦</i> Corporativos <i aria-hidden="true">✦</i> Aniversários <i aria-hidden="true">✦</i> Formaturas</p>
@@ -299,7 +298,7 @@ body::before{content:"";position:fixed;inset:0 0 auto;height:env(safe-area-inset
       <p class="ornamento" aria-hidden="true">✦</p>
       <h2 class="rotulo" data-fx="surgir">O que dizem os convidados</h2>
       <div class="nota" data-fx="subir"><strong>4,8</strong><span class="estrelas" aria-label="5 estrelas">★★★★★</span></div>
-      <p class="nota-legenda" data-fx="surgir">781 avaliações no Google</p>
+      <p class="nota-legenda" data-fx="surgir">787 avaliações no Google</p>
       <div class="cartoes">
         <article class="cartao" data-fx="subir"><span class="estrelas" aria-hidden="true">★★★★★</span><h3>O ambiente</h3><p>Bonito, espaçoso e bem estruturado.</p></article>
         <article class="cartao" data-fx="subir" data-fx-atraso="100"><span class="estrelas" aria-hidden="true">★★★★★</span><h3>A mesa</h3><p>Comida e bebidas excelentes, com destaque para o open bar.</p></article>
@@ -320,7 +319,7 @@ body::before{content:"";position:fixed;inset:0 0 auto;height:env(safe-area-inset
         <a class="btn btn-cheio js-wpp" href="https://wa.me/5511995557010" target="_blank" rel="noopener">Consultar minha data</a>
         <a class="btn btn-linha" href="https://www.instagram.com/tatuapehallprimeoficial/" target="_blank" rel="noopener">Ver o Instagram</a>
       </div>
-      <p class="prova" data-fx="surgir"><b>★★★★★</b><strong>4,8</strong> · 781 avaliações no Google</p>
+      <p class="prova" data-fx="surgir"><b>★★★★★</b><strong>4,8</strong> · 787 avaliações no Google</p>
       <div class="ficha" data-fx="surgir">
         <div><span class="rotulo">Endereço</span><strong>R. Antônio de Barros, 644<br>Tatuapé</strong></div>
         <div><span class="rotulo">WhatsApp</span><strong>(11) 99555-7010</strong></div>
@@ -365,7 +364,7 @@ body::before{content:"";position:fixed;inset:0 0 auto;height:env(safe-area-inset
   var reduzido=window.matchMedia("(prefers-reduced-motion: reduce)").matches;
   var toque=window.matchMedia("(pointer: coarse)").matches;
   var secao=document.querySelector(".caminhada");
-  var video=document.getElementById("video-salao");
+  var tela=document.getElementById("quadro-salao"),ctx=tela.getContext("2d");
   var legendas=document.getElementById("legendas");
   var passos=document.querySelector(".passos");
 
@@ -446,25 +445,28 @@ body::before{content:"";position:fixed;inset:0 0 auto;height:env(safe-area-inset
   })}
 
   /* vídeo: carrega inteiro para buscar quadro a quadro sem travar */
-  /* vídeo: versão leve no celular; carrega inteiro para avançar quadro a quadro.
-     Safari/iPhone só mostram os quadros depois de um play, então destravamos assim que o vídeo chega
-     (vídeo mudo pode tocar sem toque) e tentamos de novo a cada toque até dar certo. */
-  var src=(window.innerWidth<900||toque)?"assets/salao-celular.mp4":"assets/salao.mp4";
-  var destravado=false;
-  function destravar(){
-    if(destravado||!video.currentSrc)return;
-    video.muted=true;
-    var pr=video.play();
-    if(pr&&pr.then){pr.then(function(){video.pause();destravado=true;video.currentTime=tempoMostrado||0}).catch(function(){})}
-    else{video.pause();destravado=true}
+  /* sequência de quadros: 4 por segundo do vídeo do salão, desenhados num canvas.
+     Funciona igual em iPhone, Safari, Chrome e Android, sem depender de player de vídeo. */
+  var FPS=4,TOTAL=158,quadros=new Array(TOTAL),prontos=new Array(TOTAL),ultimoDesenhado=-1;
+  function arquivo(i){return "assets/quadros/q"+String(i+1).padStart(3,"0")+".jpg"}
+  function carregar(i){
+    if(quadros[i])return;var im=new Image();quadros[i]=im;im.decoding="async";
+    im.onload=function(){prontos[i]=true;if(ultimoDesenhado<0||Math.abs(i-alvoQuadro())<Math.abs(ultimoDesenhado-alvoQuadro()))desenhar(true)};
+    im.src=arquivo(i);
   }
-  function usar(url){video.src=url;video.load();video.addEventListener("loadeddata",destravar,{once:true})}
-  var trocou=false;
-  var reserva=setTimeout(function(){if(!trocou){trocou=true;usar(src)}},9000);
-  try{
-    fetch(src).then(function(r){if(!r.ok)throw 0;return r.blob()}).then(function(b){if(trocou)return;trocou=true;clearTimeout(reserva);usar(URL.createObjectURL(b))}).catch(function(){if(!trocou){trocou=true;clearTimeout(reserva);usar(src)}});
-  }catch(e){trocou=true;usar(src)}
-  ["touchstart","pointerdown","keydown"].forEach(function(ev){window.addEventListener(ev,destravar,{passive:true})});
+  var ordem=[],k;for(k=0;k<TOTAL;k+=8)ordem.push(k);for(k=0;k<TOTAL;k+=2)if(k%8)ordem.push(k);for(k=1;k<TOTAL;k+=2)ordem.push(k);
+  (function fila(){var lote=ordem.splice(0,6);lote.forEach(carregar);if(ordem.length)setTimeout(fila,lote.length?120:0)})();
+  function ajustarTela(){var r=tela.getBoundingClientRect(),d=Math.min(window.devicePixelRatio||1,2);tela.width=Math.max(1,Math.round(r.width*d));tela.height=Math.max(1,Math.round(r.height*d));desenhar(true)}
+  function alvoQuadro(){return Math.max(0,Math.min(TOTAL-1,Math.round((tempoMostrado||0)*FPS)))}
+  function desenhar(forcar){
+    var alvo=alvoQuadro(),i=alvo,dist=0;
+    while(!prontos[i]&&dist<TOTAL){dist++;if(alvo-dist>=0&&prontos[alvo-dist]){i=alvo-dist;break}if(alvo+dist<TOTAL&&prontos[alvo+dist]){i=alvo+dist;break}}
+    if(!prontos[i]||(i===ultimoDesenhado&&!forcar))return;
+    var im=quadros[i],cw=tela.width,ch=tela.height,esc=Math.max(cw/im.naturalWidth,ch/im.naturalHeight),w=im.naturalWidth*esc,h=im.naturalHeight*esc;
+    ctx.drawImage(im,(cw-w)/2,(ch-h)/2,w,h);ultimoDesenhado=i;
+  }
+  window.addEventListener("resize",ajustarTela);
+  function destravar(){}
   if(reduzido){PARADAS.forEach(function(p){p.el.classList.add("ativa")});return}
 
   var pesoTotal=PARADAS.reduce(function(s,p){return s+p.peso},0);
@@ -494,14 +496,12 @@ body::before{content:"";position:fixed;inset:0 0 auto;height:env(safe-area-inset
   }
   function quadro(){
     tempoMostrado+=(tempoAlvo-tempoMostrado)*.18;
-    if(video.readyState>=1&&!video.seeking&&Math.abs(video.currentTime-tempoMostrado)>.03){
-      try{video.currentTime=tempoMostrado}catch(e){}
-    }
+    desenhar(false);
     requestAnimationFrame(quadro);
   }
   window.addEventListener("scroll",medir,{passive:true});
   window.addEventListener("resize",medir);
-  medir();requestAnimationFrame(quadro);
+  medir();ajustarTela();requestAnimationFrame(quadro);
 })();
 </script>
 <script src="sites-incriveis.js" defer></script>
@@ -525,7 +525,7 @@ document.addEventListener("DOMContentLoaded",function(){
   /* 2. A porta oval do letreiro se abre para o salão (iris com clip-path) */
   gsap.fromTo("#tela",{clipPath:"inset(22% 14% 22% 14% round 50%)"},{clipPath:"inset(0% 0% 0% 0% round 0%)",ease:"none",
     scrollTrigger:{trigger:".caminhada",start:"top 85%",end:"top top",scrub:true}});
-  gsap.fromTo("#tela video",{scale:1.25},{scale:1,ease:"none",scrollTrigger:{trigger:".caminhada",start:"top 85%",end:"top top",scrub:true}});
+  gsap.fromTo("#tela canvas",{scale:1.25},{scale:1,ease:"none",scrollTrigger:{trigger:".caminhada",start:"top 85%",end:"top top",scrub:true}});
 
   /* 3. Palavras que acendem com a rolagem */
   var t=document.getElementById("acender");
